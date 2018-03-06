@@ -18,7 +18,9 @@ except OSError:
 
 
 def mvFileWithOrder(title, sourcePath, destPath, order):
-    os.rename(sourcePath+'/'+title, destPath+'/'+order+title)
+    fromLoc = os.path.join(sourcePath, title)
+    toLoc = os.path.join(destPath, order + title)
+    os.rename(fromLoc, toLoc)
 
 
 def checkKeyWords(text):
