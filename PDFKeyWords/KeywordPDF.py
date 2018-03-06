@@ -6,7 +6,8 @@ import PyPDF2
 # Also, PyPDF2 is not optimized for all PDFS. Some PDFS may not be read/fully read.
 
 filterDirName = sys.argv[1] #dir where to move pdfs
-keyWords = [word.lower() for word in sys.argv[2:]] #keywords to look for
+numOfPagesLimit = int(sys.argv[2]) #Max num of pages per PDF
+keyWords = [word.lower() for word in sys.argv[3:]] #keywords to look for
 filteredPdfList = [] #contains all pdfs titles, word count rep, and dir
 
 try: 
@@ -33,7 +34,7 @@ def extractPDFText(pdfFile):
     pdfFile = open(pdfFile, 'rb')
     pdfReader = PyPDF2.PdfFileReader(pdfFile)
     numOfPages = pdfReader.numPages
-    if numOfPages > 2: # If The PDF is too long, Don't Extract It
+    if numOfPages > numOfPagesLimit: # Don't include PDFS that pass limit
         return
     for page in range(pdfReader.numPages):
         pdfPage = pdfReader.getPage(page)
