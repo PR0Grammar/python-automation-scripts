@@ -26,33 +26,51 @@ def getPriceSelector(url):
 #Returns all product and their prices of the first search page
 def getEbaySearch(productName):
     itemDesc = []
-    url = 'https://www.ebay.com/sch/'+productName
+    url = 'https://www.ebay.com/sch/' + productName
     res = requests.get(url)
     res.raise_for_status()
-    nameFilter = re.compile(r'#item')
 
     soup = bs4.BeautifulSoup(res.text, 'html.parser')
     for listItem in soup.find_all('li', {'class' : 'sresult'}): #li 'sresult' is each item on search page
-        nameAttr = listItem.findChild('a',{'class':'vip'}) #a tag includes title of product
-        priceAttr = listItem.findChild('span',{'class': 'bold'})
-        if priceAttr is None: #Avoid special listing/styles of products
-            continue
-        name = nameAttr.text
-        price = re.search(r'(\d)+.\d\d', priceAttr.text).group(0)
-        itemDesc.append([name, float(price)])
-    print(itemDesc)
+        try:
+            nameAttr = listItem.findChild('a',{'class':'vip'}) #a tag includes title of product
+            priceAttr = listItem.findChild('span',{'class': 'bold'})
+            name = nameAttr.text
+            price = re.search(r'(\d)+.\d\d', priceAttr.text).group(0)
+            itemDesc.append([name, float(price)])
+        except AttributeError:
+            pass
     return itemDesc
-        
 
-def getAmazonSearch():
-    # TODO: Get list of products and their prices
-    return
-    
+def getAmazonSearch(productName):
+    itemDesc = []
+    url = 'https://www.amazon.com/s/field-keywords=' + productName
+    res = requests.get(url)
+    res.raise_for_status() 
+        
+    soup = bs4.BeautifulSoup(res.text, 'html.parser')
+    for listItem in soup.find_all('li',{'class':'s-result-item'}):
+        try:
+            nameAttr = listItem.findChild('h2')
+            wholePriceAttr = listItem.findChild('span', {'class': 'sx-price-whole'})    #Amazon splits up pricing into two elements
+            fractPriceAttr = listItem.findChild('sup', {'class': 'sx-price-fractional'})
+            name = nameAttr.text
+            price = wholePriceAttr.text + '.' + fractPriceAttr.text
+            itemDesc.append([name,float(price)])
+        except AttributeError:
+            pass
+    return itemDesc
 
 def main():
     productName = ' '.join(sys.argv[1:])
-    getEbaySearch(productName)
-        
+    print('*'*50 + 'EBAY RESULT' + '*'*50)
+    for item, price in getEbaySearch(productName):
+        print(item +': $' + str(price))
+    print('*'*50 + 'AMAZON RESULT' + '*'*50)
+    for item, price in getAmazonSearch(productName):
+        print(item +': $' + str(price))
+
+# TODO: Remove whitespace and line breaks in ebay title listing
 # TODO: Allow users to select items from product list
 # TODO: Notify user if price changes
 
