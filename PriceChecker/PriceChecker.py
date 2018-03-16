@@ -33,11 +33,16 @@ def getEbaySearch(productName):
     soup = bs4.BeautifulSoup(res.text, 'html.parser')
     for listItem in soup.find_all('li', {'class' : 'sresult'}): #li 'sresult' is each item on search page
         try:
-            nameAttr = listItem.findChild('a',{'class':'vip'}) #a tag includes title of product
+            nameAttr = listItem.findChild('a',{'class':'vip'})#a tag includes title of product
+            #Removes 'Newly Listed' header for newly listed items
+            if(nameAttr.find('span')):
+                newlyListed = nameAttr.find('span')
+                newlyListed.extract()
             priceAttr = listItem.findChild('span',{'class': 'bold'})
-            name = nameAttr.text
+            name = nameAttr.text.strip()
             price = re.search(r'(\d)+.\d\d', priceAttr.text).group(0)
             itemDesc.append([name, float(price)])
+            
         except AttributeError:
             pass
     return itemDesc
@@ -57,6 +62,7 @@ def getAmazonSearch(productName):
             name = nameAttr.text
             price = wholePriceAttr.text + '.' + fractPriceAttr.text
             itemDesc.append([name,float(price)])
+            
         except AttributeError:
             pass
     return itemDesc
@@ -70,7 +76,6 @@ def main():
     for item, price in getAmazonSearch(productName):
         print(item +': $' + str(price))
 
-# TODO: Remove whitespace and line breaks in ebay title listing
 # TODO: Allow users to select items from product list
 # TODO: Notify user if price changes
 
