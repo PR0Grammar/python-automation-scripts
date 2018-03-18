@@ -8,9 +8,8 @@ import sys
 def mergePdf(pdfList, order):
     try:
         writer = PyPDF2.PdfFileWriter()
-        combinedPdf = open('CombinedPdf.pdf','wb')
+        combinedPdf = open('MergedPDF.pdf','wb')
         for i in order:
-            print(pdfList[i][1])
             pdfFile = open(pdfList[i][1],'rb')
             pdfFileReader = PyPDF2.PdfFileReader(pdfFile)
             for pageNum in range (pdfFileReader.numPages):
@@ -45,6 +44,7 @@ def main():
     pdfSequence = input().split(',')
     sequenceInt = [int(i)-1 for i in pdfSequence] #Convert all elements to int, subtract by one to get indicies
     mergePdf(listOfPdfs, sequenceInt)
+    print('DONE! The PDFs selected are merged on \'MergedPDF.pdf\'')
     
     
 
